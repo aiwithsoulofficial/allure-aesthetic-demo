@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Skin Assessment - Allure Aesthetic</title>
+    <link href="https://fonts.googleapis.com/css2?family=Forum&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet">
+    <style>
+        *, *::before, *::after {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --dark: #0a1519;
+            --warm-brown: #4c2e29;
+            --beige: #d2c7be;
+            --cream: #faf8f6;
+            --white: #ffffff;
+        }
+
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--cream);
+            color: var(--dark);
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        /* ── Header ── */
+        .quiz-header {
+            text-align: center;
+            padding: 24px 20px 0;
+        }
+
+        .quiz-header img {
+            height: 40px;
+            width: auto;
+        }
+
+        /* ── Progress Bar ── */
+        .progress-container {
+            padding: 20px 20px 0;
+            max-width: 560px;
+            margin: 0 auto;
+        }
+
+        .progress-meta {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 8px;
+        }
+
+        .progress-label {
+            font-size: 13px;
+            font-weight: 500;
+            color: var(--warm-brown);
+            letter-spacing: 0.02em;
+        }
+
+        .progress-track {
+            width: 100%;
+            height: 4px;
+            background: var(--beige);
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .progress-fill {
+            height: 100%;
+            width: 0%;
+            background: var(--warm-brown);
+            border-radius: 4px;
+            transition: width 0.5s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        /* ── Step Container ── */
+        .quiz-body {
+            max-width: 560px;
+            margin: 0 auto;
+            padding: 40px 20px 60px;
+            position: relative;
+            min-height: calc(100vh - 120px);
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+        }
+
+        .step {
+            display: none;
+            opacity: 0;
+            transform: translateY(16px);
+            transition: opacity 0.4s ease, transform 0.4s ease;
+        }
+
+        .step.active {
+            display: block;
+        }
+
+        .step.visible {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
+        /* ── Question Heading ── */
+        .step h2 {
+            font-family: 'Forum', serif;
+            font-size: clamp(24px, 5vw, 32px);
+            font-weight: 400;
+            color: var(--dark);
+            line-height: 1.3;
+            margin-bottom: 28px;
+        }
+
+        .step p.subtitle {
+            font-size: 15px;
+            color: #6b6360;
+            line-height: 1.6;
+            margin-top: -16px;
+            margin-bottom: 28px;
+        }
+
+        /* ── Option Cards ── */
+        .options {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+
+        .option-card {
+            background: var(--white);
+            border: 1.5px solid #e8e4e0;
+            border-radius: 12px;
+            padding: 18px 20px;
+            cursor: pointer;
+            transition: all 0.25s ease;
+            font-size: 15px;
+            font-weight: 400;
+            color: var(--dark);
+            line-height: 1.4;
+            position: relative;
+            user-select: none;
+            -webkit-tap-highlight-color: transparent;
+        }
+
+        .option-card:hover {
+            background: var(--beige);
+            border-color: var(--beige);
+        }
+
+        .option-card.selected {
+            background: var(--cream);
+            border-color: var(--warm-brown);
+            border-width: 2px;
+            padding: 17px 19px;
+        }
+
+        .option-card.selected::after {
+            content: '';
+            position: absolute;
+            right: 18px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--warm-brown);
+            background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23faf8f6' stroke-width='3' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpolyline points='20 6 9 17 4 12'/%3E%3C/svg%3E");
+            background-size: 12px;
+            background-position: center;
+            background-repeat: no-repeat;
+        }
+
+        /* ── Back Button ── */
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            background: none;
+            border: none;
+            color: #8a7f7a;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            padding: 8px 0;
+            margin-bottom: 20px;
+            transition: color 0.2s;
+            font-family: 'Inter', sans-serif;
+        }
+
+        .back-btn:hover {
+            color: var(--warm-brown);
+        }
+
+        .back-btn svg {
+            width: 16px;
+            height: 16px;
+        }
+
+        /* ── Lead Capture Form ── */
+        .form-group {
+            margin-bottom: 20px;
+        }
+
+        .form-group label {
+            display: block;
+            font-size: 14px;
+            font-weight: 500;
+            color: var(--dark);
+            margin-bottom: 6px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 14px 16px;
+            border: 1.5px solid #e8e4e0;
+            border-radius: 10px;
+            font-size: 15px;
+            font-family: 'Inter', sans-serif;
+            color: var(--dark);
+            background: var(--white);
+            transition: border-color 0.2s;
+            outline: none;
+        }
+
+        .form-group input:focus {
+            border-color: var(--warm-brown);
+        }
+
+        .form-group input::placeholder {
+            color: #b8b0aa;
+        }
+
+        .privacy-note {
+            font-size: 13px;
+            color: #8a7f7a;
+            line-height: 1.5;
+            margin-top: 4px;
+            margin-bottom: 28px;
+        }
+
+        .submit-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--warm-brown);
+            color: var(--cream);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.25s, transform 0.15s;
+            letter-spacing: 0.01em;
+        }
+
+        .submit-btn:hover {
+            background: #3d241f;
+        }
+
+        .submit-btn:active {
+            transform: scale(0.985);
+        }
+
+        /* ── Result Screen ── */
+        .result-card {
+            background: var(--white);
+            border-radius: 16px;
+            padding: 32px 24px;
+            border: 1px solid #e8e4e0;
+            margin-bottom: 24px;
+        }
+
+        .result-card h3 {
+            font-family: 'Forum', serif;
+            font-size: 20px;
+            font-weight: 400;
+            color: var(--warm-brown);
+            margin-bottom: 12px;
+        }
+
+        .result-card p {
+            font-size: 15px;
+            line-height: 1.7;
+            color: #4a4340;
+        }
+
+        .result-ctas {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+            margin-top: 32px;
+        }
+
+        .cta-primary {
+            display: block;
+            text-align: center;
+            padding: 16px;
+            background: var(--warm-brown);
+            color: var(--cream);
+            text-decoration: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            transition: background 0.25s;
+        }
+
+        .cta-primary:hover {
+            background: #3d241f;
+        }
+
+        .cta-secondary {
+            text-align: center;
+            font-size: 15px;
+            color: #6b6360;
+        }
+
+        .cta-secondary a {
+            color: var(--warm-brown);
+            text-decoration: none;
+            font-weight: 500;
+        }
+
+        .cta-secondary a:hover {
+            text-decoration: underline;
+        }
+
+        .result-greeting {
+            font-size: 15px;
+            color: #6b6360;
+            margin-bottom: 24px;
+            line-height: 1.6;
+        }
+
+        /* ── Intro Screen ── */
+        .intro-icon {
+            width: 56px;
+            height: 56px;
+            background: var(--white);
+            border: 1.5px solid #e8e4e0;
+            border-radius: 14px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+
+        .intro-icon svg {
+            width: 28px;
+            height: 28px;
+            color: var(--warm-brown);
+        }
+
+        .start-btn {
+            width: 100%;
+            padding: 16px;
+            background: var(--warm-brown);
+            color: var(--cream);
+            border: none;
+            border-radius: 10px;
+            font-size: 16px;
+            font-weight: 500;
+            font-family: 'Inter', sans-serif;
+            cursor: pointer;
+            transition: background 0.25s, transform 0.15s;
+            margin-top: 8px;
+        }
+
+        .start-btn:hover {
+            background: #3d241f;
+        }
+
+        .start-btn:active {
+            transform: scale(0.985);
+        }
+
+        .intro-time {
+            text-align: center;
+            font-size: 13px;
+            color: #8a7f7a;
+            margin-top: 12px;
+        }
+
+        /* ── Responsive ── */
+        @media (min-width: 640px) {
+            .quiz-header {
+                padding-top: 32px;
+            }
+
+            .quiz-body {
+                padding-top: 48px;
+            }
+
+            .option-card {
+                padding: 20px 24px;
+            }
+
+            .option-card.selected {
+                padding: 19px 23px;
+            }
+
+            .result-card {
+                padding: 36px 32px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <!-- Header -->
+    <header class="quiz-header">
+        <img src="../assets/website-logo-alt-1.png" alt="Allure Aesthetic">
+    </header>
+
+    <!-- Progress Bar -->
+    <div class="progress-container" id="progressContainer" style="display: none;">
+        <div class="progress-meta">
+            <span class="progress-label" id="progressLabel">Step 1 of 5</span>
+            <span class="progress-label" id="progressPercent">20%</span>
+        </div>
+        <div class="progress-track">
+            <div class="progress-fill" id="progressFill"></div>
+        </div>
+    </div>
+
+    <!-- Quiz Body -->
+    <div class="quiz-body">
+
+        <!-- Step 0: Intro -->
+        <div class="step active" id="step-0">
+            <div class="intro-icon">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round">
+                    <path d="M12 3c-1.5 0-3 .5-4.2 1.4C6.5 5.4 5.6 7 5.2 8.8 3.3 9.5 2 11.3 2 13.4c0 2.8 2.2 5 5 5h10c2.8 0 5-2.2 5-5 0-2.1-1.3-3.9-3.2-4.6-.4-1.8-1.3-3.4-2.6-4.4C15 3.5 13.5 3 12 3z"/>
+                    <path d="M12 12v6"/>
+                    <path d="M9.5 14.5L12 12l2.5 2.5"/>
+                </svg>
+            </div>
+            <h2>Your Personalised Skin Assessment</h2>
+            <p class="subtitle">Answer 5 quick questions and we will create a tailored skin plan based on your goals - not a one-size-fits-all recommendation.</p>
+            <button class="start-btn" onclick="startQuiz()">Start My Assessment</button>
+            <p class="intro-time">Takes less than 2 minutes</p>
+        </div>
+
+        <!-- Step 1: Primary Concern -->
+        <div class="step" id="step-1">
+            <h2>What concerns you most about your skin?</h2>
+            <div class="options" data-question="concern">
+                <div class="option-card" data-value="fine-lines" onclick="selectOption(this)">Fine lines and wrinkles</div>
+                <div class="option-card" data-value="volume-loss" onclick="selectOption(this)">Loss of volume or sagging</div>
+                <div class="option-card" data-value="uneven-tone" onclick="selectOption(this)">Uneven skin tone or texture</div>
+                <div class="option-card" data-value="dull-skin" onclick="selectOption(this)">Dull, tired-looking skin</div>
+                <div class="option-card" data-value="multiple" onclick="selectOption(this)">Multiple concerns</div>
+            </div>
+        </div>
+
+        <!-- Step 2: Where -->
+        <div class="step" id="step-2">
+            <button class="back-btn" onclick="goBack()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                Back
+            </button>
+            <h2>Where do you notice it most?</h2>
+            <div class="options" data-question="area">
+                <div class="option-card" data-value="eyes" onclick="selectOption(this)">Around my eyes (crow's feet)</div>
+                <div class="option-card" data-value="forehead" onclick="selectOption(this)">Forehead and frown lines</div>
+                <div class="option-card" data-value="cheeks" onclick="selectOption(this)">Cheeks and mid-face</div>
+                <div class="option-card" data-value="jawline" onclick="selectOption(this)">Jawline and neck</div>
+                <div class="option-card" data-value="lips" onclick="selectOption(this)">Lips and mouth area</div>
+                <div class="option-card" data-value="all-over" onclick="selectOption(this)">All over</div>
+            </div>
+        </div>
+
+        <!-- Step 3: Ideal Result -->
+        <div class="step" id="step-3">
+            <button class="back-btn" onclick="goBack()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                Back
+            </button>
+            <h2>How would you describe your ideal result?</h2>
+            <div class="options" data-question="goal">
+                <div class="option-card" data-value="subtle" onclick="selectOption(this)">Subtle refresh - I want to look like me, just rested</div>
+                <div class="option-card" data-value="noticeable" onclick="selectOption(this)">Noticeable improvement - I want people to notice</div>
+                <div class="option-card" data-value="significant" onclick="selectOption(this)">Significant change - I'm ready for a transformation</div>
+            </div>
+        </div>
+
+        <!-- Step 4: Experience -->
+        <div class="step" id="step-4">
+            <button class="back-btn" onclick="goBack()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                Back
+            </button>
+            <h2>Have you had cosmetic treatments before?</h2>
+            <div class="options" data-question="experience">
+                <div class="option-card" data-value="never" onclick="selectOption(this)">Never - this would be my first</div>
+                <div class="option-card" data-value="occasionally" onclick="selectOption(this)">Once or twice, a while ago</div>
+                <div class="option-card" data-value="regular" onclick="selectOption(this)">Yes, I get treatments regularly</div>
+                <div class="option-card" data-value="researched" onclick="selectOption(this)">I've researched but haven't taken the step yet</div>
+            </div>
+        </div>
+
+        <!-- Step 5: Clinic Choice -->
+        <div class="step" id="step-5">
+            <button class="back-btn" onclick="goBack()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                Back
+            </button>
+            <h2>What matters most to you in choosing a clinic?</h2>
+            <div class="options" data-question="priority">
+                <div class="option-card" data-value="experience" onclick="selectOption(this)">Experience and qualifications of the nurse</div>
+                <div class="option-card" data-value="natural" onclick="selectOption(this)">Natural-looking results</div>
+                <div class="option-card" data-value="comfort" onclick="selectOption(this)">A comfortable, no-pressure environment</div>
+                <div class="option-card" data-value="proof" onclick="selectOption(this)">Seeing real before-and-after results</div>
+                <div class="option-card" data-value="location" onclick="selectOption(this)">Location and convenience</div>
+            </div>
+        </div>
+
+        <!-- Step 6: Lead Capture -->
+        <div class="step" id="step-6">
+            <button class="back-btn" onclick="goBack()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M19 12H5"/><path d="M12 19l-7-7 7-7"/></svg>
+                Back
+            </button>
+            <h2>Almost there - let's personalise your results</h2>
+            <form id="leadForm" onsubmit="submitForm(event)">
+                <div class="form-group">
+                    <label for="firstName">First name</label>
+                    <input type="text" id="firstName" name="firstName" placeholder="Your first name" required>
+                </div>
+                <div class="form-group">
+                    <label for="email">Email</label>
+                    <input type="email" id="email" name="email" placeholder="your@email.com" required>
+                </div>
+                <div class="form-group">
+                    <label for="phone">Phone</label>
+                    <input type="tel" id="phone" name="phone" placeholder="04XX XXX XXX" required>
+                </div>
+                <p class="privacy-note">Your information is 100% confidential. We'll only use it to send your personalised skin plan.</p>
+                <button type="submit" class="submit-btn">Get My Skin Plan</button>
+            </form>
+        </div>
+
+        <!-- Step 7: Result -->
+        <div class="step" id="step-7">
+            <h2>Your Personalised Skin Plan</h2>
+            <p class="result-greeting" id="resultGreeting"></p>
+            <div class="result-card" id="resultCard">
+                <h3 id="resultTitle"></h3>
+                <p id="resultBody"></p>
+            </div>
+            <div class="result-ctas">
+                <a href="https://www.fresha.com" target="_blank" class="cta-primary">Book Your Free Consultation</a>
+                <p class="cta-secondary">Or call us: <a href="tel:0448116188">0448 116 188</a></p>
+            </div>
+        </div>
+
+    </div>
+
+    <script>
+        // ── State ──
+        let currentStep = 0;
+        const totalQuestions = 5;
+        const answers = {};
+
+        // ── Navigation ──
+        function startQuiz() {
+            goToStep(1);
+        }
+
+        function goToStep(stepNum) {
+            const current = document.getElementById('step-' + currentStep);
+            current.classList.remove('visible');
+
+            setTimeout(() => {
+                current.classList.remove('active');
+
+                currentStep = stepNum;
+                const next = document.getElementById('step-' + currentStep);
+                next.classList.add('active');
+
+                // Trigger reflow
+                void next.offsetWidth;
+
+                requestAnimationFrame(() => {
+                    next.classList.add('visible');
+                });
+
+                updateProgress();
+                window.scrollTo({ top: 0, behavior: 'smooth' });
+            }, 250);
+        }
+
+        function goBack() {
+            if (currentStep > 1) {
+                goToStep(currentStep - 1);
+            }
+        }
+
+        // ── Progress ──
+        function updateProgress() {
+            const container = document.getElementById('progressContainer');
+
+            if (currentStep === 0 || currentStep === 7) {
+                container.style.display = 'none';
+                return;
+            }
+
+            container.style.display = 'block';
+
+            let displayStep = currentStep;
+            let total = totalQuestions + 1; // 5 questions + lead capture
+
+            if (currentStep === 6) {
+                displayStep = 6;
+            }
+
+            const pct = Math.round((displayStep / total) * 100);
+            const label = currentStep <= 5
+                ? 'Step ' + currentStep + ' of ' + totalQuestions
+                : 'Final step';
+
+            document.getElementById('progressLabel').textContent = label;
+            document.getElementById('progressPercent').textContent = pct + '%';
+
+            requestAnimationFrame(() => {
+                document.getElementById('progressFill').style.width = pct + '%';
+            });
+        }
+
+        // ── Option Selection ──
+        function selectOption(el) {
+            const container = el.closest('.options');
+            const question = container.dataset.question;
+
+            // Deselect siblings
+            container.querySelectorAll('.option-card').forEach(c => c.classList.remove('selected'));
+
+            // Select this one
+            el.classList.add('selected');
+            answers[question] = el.dataset.value;
+
+            // Brief pause then advance
+            setTimeout(() => {
+                goToStep(currentStep + 1);
+            }, 350);
+        }
+
+        // ── Form Submission ──
+        function submitForm(e) {
+            e.preventDefault();
+            answers.name = document.getElementById('firstName').value;
+            answers.email = document.getElementById('email').value;
+            answers.phone = document.getElementById('phone').value;
+
+            generateResult();
+            goToStep(7);
+        }
+
+        // ── Result Generation ──
+        function generateResult() {
+            const name = answers.name || 'there';
+            document.getElementById('resultGreeting').textContent =
+                'Hi ' + name + ', based on your answers we have put together a personalised recommendation just for you.';
+
+            const concern = answers.concern;
+            const area = answers.area;
+            const goal = answers.goal;
+            const experience = answers.experience;
+
+            let title = '';
+            let body = '';
+
+            // ── Build dynamic recommendation ──
+
+            // Concern + Area combinations
+            if (concern === 'fine-lines' && (area === 'forehead' || area === 'eyes')) {
+                title = 'Wrinkle Reduction Consultation';
+                if (goal === 'subtle') {
+                    body = 'Based on your answers, we would recommend starting with a wrinkle-reduction consultation to explore gentle, natural options for your ' +
+                        (area === 'forehead' ? 'forehead lines' : 'crow\'s feet') +
+                        '. We specialise in subtle results that soften lines while keeping your natural expressions beautifully intact.';
+                } else if (goal === 'noticeable') {
+                    body = 'Your ' + (area === 'forehead' ? 'forehead and frown lines' : 'eye area') +
+                        ' would respond well to a targeted treatment plan. We would love to show you how we can visibly smooth those lines while maintaining a completely natural look.';
+                } else {
+                    body = 'We can create a comprehensive plan to significantly reduce those ' +
+                        (area === 'forehead' ? 'forehead lines' : 'crow\'s feet') +
+                        '. Our approach combines the most effective techniques for transformative yet natural-looking results.';
+                }
+            } else if (concern === 'volume-loss') {
+                title = 'Volume Restoration Consultation';
+                if (area === 'cheeks' || area === 'jawline') {
+                    body = 'Loss of volume in the ' + (area === 'cheeks' ? 'cheeks and mid-face' : 'jawline and neck') +
+                        ' is one of the most common changes we see, and it is also one of the most rewarding to address. A personalised volume-restoration plan can bring back that youthful contour you are looking for.';
+                } else if (area === 'lips') {
+                    body = 'The lips and mouth area are often one of the first places we notice changes. We can discuss subtle enhancement options that restore fullness and definition in a way that looks and feels completely natural.';
+                } else {
+                    body = 'Volume restoration is one of the most transformative treatments we offer. We would love to assess your unique facial structure and create a plan that brings back natural fullness and contour where you need it most.';
+                }
+            } else if (concern === 'uneven-tone') {
+                title = 'Skin Rejuvenation Consultation';
+                body = 'Uneven skin tone and texture can make you look more tired than you feel. We have advanced options to refine and even out your complexion, revealing smoother, more radiant skin. Your consultation will include a thorough skin analysis so we can recommend the best approach for your skin type.';
+            } else if (concern === 'dull-skin') {
+                title = 'Radiance Revival Consultation';
+                body = 'Dull, tired-looking skin is often a sign that your skin needs a renewal boost. We can show you how to restore that healthy glow with treatments tailored to bring luminosity and freshness back to your complexion. Many of our clients see a visible difference from their very first session.';
+            } else if (concern === 'multiple') {
+                title = 'Comprehensive Skin Assessment';
+                body = 'When there are multiple concerns to address, a thorough in-person assessment is the best starting point. We will map out a staged treatment plan that tackles each concern in the right order for the best possible results - so you can see real progress with every visit.';
+            } else {
+                // Fallback for any combination
+                title = 'Personalised Treatment Consultation';
+                body = 'Based on your answers, a one-on-one consultation is the ideal next step. We will assess your skin in person, discuss your goals in detail, and design a treatment plan that is tailored specifically to you.';
+            }
+
+            // Add experience-specific note
+            if (experience === 'never' || experience === 'researched') {
+                body += ' As someone exploring treatments for the first time, you will love our relaxed, no-pressure approach - we will walk you through everything at your pace.';
+            } else if (experience === 'regular') {
+                body += ' As someone who understands treatments well, you will appreciate our detail-oriented approach and clinical-grade techniques.';
+            }
+
+            document.getElementById('resultTitle').textContent = title;
+            document.getElementById('resultBody').textContent = body;
+        }
+
+        // ── Init: show intro with animation ──
+        window.addEventListener('DOMContentLoaded', () => {
+            const intro = document.getElementById('step-0');
+            requestAnimationFrame(() => {
+                intro.classList.add('visible');
+            });
+        });
+    </script>
+
+</body>
+</html>
